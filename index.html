@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>УЦЦ 9 СЕРИЯ - ТАЙМЕР ОЖИДАНИЯ</title>
+    <style>
+        /* Оформление в стиле Спид Мастера */
+        body { 
+            background-color: black; 
+            color: #ff0000; 
+            text-align: center; 
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0;
+            padding-top: 15vh;
+            overflow: hidden;
+        }
+        h1 { font-size: 24px; letter-spacing: 5px; color: white; }
+        
+        /* Тот самый таймер */
+        #timer { 
+            font-size: 70px; 
+            margin: 20px 0; 
+            text-shadow: 0 0 20px red, 0 0 40px darkred;
+            animation: pulse 1s infinite alternate; /* Эффект биения сердца */
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        .status { color: #555; font-size: 14px; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <h1>ДО ВЫХОДА 9 СЕРИИ:</h1>
+    <div id="timer">ЗАГРУЗКА...</div>
+    <div class="status">СТАТУС: ОЖИДАНИЕ... МУЗЫКА ИГРАЕТ 24/7</div>
+
+    <!-- Установка музыки (назови файл music.mp3 и закинь в репозиторий) -->
+    <audio id="sad_piano" src="music.mp3" loop autoplay></audio>
+
+    <script>
+        // РАСЧЁТЫ ТАЙМЕРА
+        // Устанавливаем дату: 19 июня 2026 года
+        const countDownDate = new Date("June 19, 2026 00:00:00").getTime();
+
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            // Математика перевода миллисекунд в дни, часы, минуты и секунды
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Вывод расчётов на экран
+            document.getElementById("timer").innerHTML = days + "д " + hours + "ч "
+            + minutes + "м " + seconds + "с ";
+
+            // Если дата настала
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("timer").innerHTML = "ВЫШЛА!!!";
+            }
+        }, 1000);
+
+        // Хак для автовоспроизведения звука (нужен клик пользователя)
+        document.body.addEventListener('click', function() {
+            document.getElementById('sad_piano').play();
+        });
+    </script>
+</body>
+</html>
