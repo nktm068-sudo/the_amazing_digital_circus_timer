@@ -29,7 +29,7 @@
             height: 100%;
             border: none;
         }
-        /* Таймер */
+        /* Большой красный таймер со свечением */
         #timer {
             font-size: 130px;
             font-weight: bold;
@@ -38,7 +38,7 @@
             margin-top: 30vh;
             display: inline-block;
         }
-        /* Текст статуса */
+        /* Крупный текст статуса */
         .status {
             font-size: 28px;
             color: #555;
@@ -46,25 +46,36 @@
             letter-spacing: 5px;
         }
 
-        /* ЭФФЕКТ ДРОЖАНИЯ И ГЛИТЧА */
+        /* ОБЫЧНОЕ ДРОЖАНИЕ (когда до конца меньше 24 часов) */
         @keyframes glitch-shake {
             0% { transform: translate(0, 0) skew(0deg); }
-            10% { transform: translate(-2px, 1px) skew(-1deg); }
             20% { transform: translate(2px, -1px) skew(2deg); }
-            30% { transform: translate(-1px, -2px) skew(0deg); }
             40% { transform: translate(2px, 2px) skew(1deg); }
-            50% { transform: translate(-2px, -1px) skew(-2deg); }
             60% { transform: translate(1px, 2px) skew(0deg); }
-            70% { transform: translate(-2px, 1px) skew(1deg); }
             80% { transform: translate(2px, -2px) skew(-1deg); }
-            90% { transform: translate(-1px, 2px) skew(2deg); }
             100% { transform: translate(0, 0) skew(0deg); }
         }
 
-        /* Класс, который JS включит, когда останется меньше дня */
+        /* КРИТИЧЕСКОЕ ДРОЖАНИЕ (последняя минута перед нулем) */
+        @keyframes extreme-shake {
+            0% { transform: translate(0, 0) scale(1); }
+            10% { transform: translate(-5px, 3px) scale(1.05) skew(-3deg); }
+            30% { transform: translate(5px, -3px) scale(0.95) skew(4deg); }
+            50% { transform: translate(-4px, -4px) scale(1.02); }
+            70% { transform: translate(4px, 4px) scale(0.98) skew(-2deg); }
+            90% { transform: translate(-3px, 2px) scale(1.03); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
         .glitch-active {
             animation: glitch-shake 0.3s infinite linear;
             text-shadow: 0 0 40px #ff0000, 3px 0 0 #00ffff, -3px 0 0 #ff00ff !important;
+        }
+
+        .extreme-active {
+            animation: extreme-shake 0.1s infinite linear;
+            text-shadow: 0 0 50px #ff0000, 6px 0 0 #00ffff, -6px 0 0 #ff00ff !important;
+            color: #fff !important;
         }
     </style>
 </head>
@@ -76,7 +87,7 @@
     <div class="status">пианино играет последние такты...</div>
 </div>
 
-<!-- Окно с YouTube -->
+<!-- Окно плеера -->
 <div id="video-container">
     <iframe id="yt-player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </div>
@@ -84,22 +95,33 @@
 <audio id="piano" src="music.mp3" loop autoplay></audio>
 
 <script>
-    // 1. Ссылка с пробелами
-    const brokenUrl = "https:// www. youtube. com/ embed/ HwAPLk_sQ3w ?list= PL2XX3iRzbgwyb6l-R0T_6VPb0p1tTl85Y &autoplay=1";
+    // 1. ПОЛНЫЙ СПИСОК ВСЕХ 8 СЕРИЙ (Разбиты пробелами)
+    const brokenUrls = [
+        "https:// www. youtube. com/ embed/ HwAPLk_sQ3w ?enablejsapi=1&autoplay=1", // 1 серия
+        "https:// www. youtube. com/ embed/ 4ofJpOEXrZs ?enablejsapi=1&autoplay=1", // 2 серия
+        "https:// www. youtube. com/ embed/ bKjfw77cxeQ ?enablejsapi=1&autoplay=1", // 3 серия
+        "https:// www. youtube. com/ embed/ Q9KWcWKo2T8 ?enablejsapi=1&autoplay=1", // 4 серия
+        "https:// www. youtube. com/ embed/ L4p2gN2CzsA ?enablejsapi=1&autoplay=1", // 5 серия
+        "https:// www. youtube. com/ embed/ mOvhHim78YA ?enablejsapi=1&autoplay=1", // 6 серия
+        "https:// www. youtube. com/ embed/ oaOG1xOk7XY ?enablejsapi=1&autoplay=1", // 7 серия
+        "https:// www. youtube. com/ embed/ DMNlzf8PiEM ?enablejsapi=1&autoplay=1"  // 8 серия
+    ];
 
-    // 2. Функция очистки пробелов
+    let currentEpisode = 0; 
+
+    // Функция, которая очищает пробелы
     function cleanUrl(urlWithSpaces) {
         return urlWithSpaces.replace(/\s+/g, ''); 
     }
 
-    // НОВАЯ ДАТА: 19 июня 2026 в 00:00:00
-    const countdowndate = new Date("June 16, 2026 21:10:00").getTime();
+    // ДАТА КОНЦА ЦИФРОВОГО ЦИРКА: 19 июня 2026 в 00:00:00
+    const countdowndate = new Date("June 16, 2026 21:35:00").getTime();
     
     const piano = document.getElementById('piano');
     const videoContainer = document.getElementById('video-container');
     const ytPlayer = document.getElementById('yt-player');
     const timerElement = document.getElementById('timer');
-    const statusTop = document.querySelector('.status:first-child'); // Верхний текст
+    const statusTop = document.querySelector('.status:first-child');
 
     const x = setInterval(function() {
         const now = new Date().getTime();
@@ -112,29 +134,51 @@
 
         timerElement.innerHTML = d + "d " + h + "h " + m + "m " + s + "s";
 
-        // Эффекты перед концом
+        // Проверка времени для включения эффектов
         if (distance > 0) {
             if (distance < 1000 * 60) { 
-                // Осталась МЕНЬШЕ МИНУТЫ — супер-взрыв и смена текста!
+                // Последняя минута перед концом
                 timerElement.className = '';
                 timerElement.classList.add('extreme-active');
                 statusTop.innerHTML = "КРИТИЧЕСКИЙ СБОЙ СИСТЕМЫ!!!";
                 statusTop.style.color = "#ff0000";
             } else if (distance < 1000 * 60 * 60 * 24) { 
-                // Осталось меньше дня — обычная тряска
+                // Меньше 24 часов до конца
                 timerElement.classList.add('glitch-active');
             }
         }
 
-        // Момент Х: 19 июня 00:00 — Цифровому Цирку конец
+        // МОМЕНТ Х: Время вышло!
         if (distance < 0) {
             clearInterval(x);
             piano.pause(); 
-            ytPlayer.src = cleanUrl(brokenUrl); 
-            videoContainer.style.display = "block";
+            
+            // Запуск первой серии
+            ytPlayer.src = cleanUrl(brokenUrls[currentEpisode]); 
+            videoContainer.style.display = "block"; 
         }
     }, 1000);
-</script>
 
+    // Слушаем сигналы от плеера для автопереключения серий
+    window.addEventListener('message', function(event) {
+        if (event.origin.includes("youtube.com")) {
+            try {
+                const data = JSON.parse(event.data);
+                // Если текущая серия полностью досмотрена
+                if (data.event === 'infoDelivery' && data.info && data.info.playerState === 0) {
+                    currentEpisode++; 
+                    
+                    if (currentEpisode < brokenUrls.length) {
+                        // Чистим от пробелов и запускаем следующую серию
+                        ytPlayer.src = cleanUrl(brokenUrls[currentEpisode]);
+                    } else {
+                        // Текст, когда просмотрены все 8 серий
+                        document.body.innerHTML = "<div style='color:red; font-size:40px; margin-top:45vh; font-family:monospace; font-weight:bold;'>ЦИФРОВОЙ ЦИРК ПОЛНОСТЬЮ УНИЧТОЖЕН</div>";
+                    }
+                }
+            } catch (e) {}
+        }
+    });
+</script>
 </body>
 </html>
