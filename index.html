@@ -60,7 +60,7 @@
 <audio id="piano" src="music.mp3" loop autoplay></audio>
 
 <script>
-    // 1. Ссылка, разбитая пробелами (как ты и просил)
+    // 1. Ссылка, разбитая пробелами
     const brokenUrl = "https:// www. youtube. com/ embed/ HwAPLk_sQ3w ?list= PL2XX3iRzbgwyb6l-R0T_6VPb0p1tTl85Y &autoplay=1";
 
     // 2. Функция, которая очищает ссылку от пробелов
@@ -68,8 +68,8 @@
         return urlWithSpaces.replace(/\s+/g, ''); 
     }
 
-    // Дата отсчета: 19 июня 2026 года
-    const countdowndate = new Date("June 19, 2026 00:00:00").getTime();
+    // Время сработает сегодня, 16 июня 2026 года в 21:30
+    const countdowndate = new Date("June 16, 2026 21:30:00").getTime();
     const piano = document.getElementById('piano');
     const videoContainer = document.getElementById('video-container');
     const ytPlayer = document.getElementById('yt-player');
@@ -88,15 +88,16 @@
         // Момент Х
         if (distance < 0) {
             clearInterval(x);
-            piano.pause(); // Выключаем фоновую музыку
+            piano.pause(); // Выключаем музыку пианино
             
-            // Активируем функцию очистки пробелов и вставляем чистую ссылку в плеер
+            // Убираем пробелы и запускаем плеер Цифрового Цирка
             ytPlayer.src = cleanUrl(brokenUrl); 
             
-            // Показываем плеер «Удивительного Цифрового Цирка» на весь экран
+            // Показываем видео на весь экран
             videoContainer.style.display = "block";
         }
     }, 1000);
 </script>
+
 </body>
 </html>
