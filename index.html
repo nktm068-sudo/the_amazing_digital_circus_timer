@@ -1,80 +1,102 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>конец уцц.</title>
     <style>
-        body { background: #000; color: #f00; font-family: 'Courier New', monospace; text-align: center; margin: 0; overflow: hidden; transition: background 0.5s; }
-        
-        /* Слой вспышки */
-        #flash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; z-index: 9999; display: none;
+        body {
+            background: #000;
+            color: #f00;
+            font-family: 'courier new', monospace;
+            text-align: center;
+            margin: 0;
+            overflow: hidden;
+            transition: background 0.5s;
         }
-
-        #timer { font-size: 80px; font-weight: bold; color: white; text-shadow: 0 0 20px #fff; margin-top: 35vh; }
-        .status { font-size: 18px; color: #333; margin-top: 20px; letter-spacing: 5px; }
+        /* Контейнер для видео */
+        #video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: none; /* скрыт до конца таймера */
+        }
+        #video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #timer {
+            font-size: 80px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px #fff;
+            margin-top: 35vh;
+        }
+        .status {
+            font-size: 18px;
+            color: #333;
+            margin-top: 20px;
+            letter-spacing: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="flash"></div>
+<div id="ui">
+    <div class="status">ожидание критического сбоя</div>
+    <div id="timer">00:00:00:00</div>
+    <div class="status">пианино играет последние такты...</div>
+</div>
 
-    <div id="ui">
-        <div class="status">ОЖИДАНИЕ КРИТИЧЕСКОГО СБОЯ</div>
-        <div id="timer">00:00:00:00</div>
-        <div class="status">ПИАНИНО ИГРАЕТ ПОСЛЕДНИЕ ТАКТЫ...</div>
-    </div>
+<!-- Окно с YouTube -->
+<div id="video-container">
+    <iframe id="yt-player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
 
-    <audio id="piano" src="music.mp3" loop autoplay></audio>
+<audio id="piano" src="music.mp3" loop autoplay></audio>
 
-    <script>
-        const countDownDate = new Date("June 19, 2026 00:00:00").getTime();
-        const piano = document.getElementById('piano');
-        const flash = document.getElementById('flash');
+<script>
+    // 1. Ссылка, разбитая пробелами (как ты и просил)
+    const brokenUrl = "https:// www. youtube. com/ embed/ HwAPLk_sQ3w ?list= PL2XX3iRzbgwyb6l-R0T_6VPb0p1tTl85Y &autoplay=1";
 
-        const x = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = countDownDate - now;
+    // 2. Функция, которая очищает ссылку от пробелов
+    function cleanUrl(urlWithSpaces) {
+        return urlWithSpaces.replace(/\s+/g, ''); 
+    }
 
-            const d = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((distance % (1000 * 60)) / 1000);
+    // Дата отсчета: 19 июня 2026 года
+    const countdowndate = new Date("June 19, 2026 00:00:00").getTime();
+    const piano = document.getElementById('piano');
+    const videoContainer = document.getElementById('video-container');
+    const ytPlayer = document.getElementById('yt-player');
 
-            document.getElementById("timer").innerHTML = d + "d:" + h + "h:" + m + "m:" + s + "s";
+    const x = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = countdowndate - now;
 
-            // МОМЕНТ Х
-            if (distance < 0) {
-                clearInterval(x);
-                piano.pause(); 
-                
-                // 1. ВСПЫШКА (БЕЛЫЙ ЭКРАН)
-                flash.style.display = 'block';
-                setTimeout(() => {
-                    flash.style.transition = 'opacity 0.05s';
-                    flash.style.opacity = '1';
-                }, 10);
-                
-                // Удаляем всё из UI под вспышкой
-                document.getElementById('ui').innerHTML = "";
+        const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((distance % (1000 * 60)) / 1000);
 
-                // 2. ЧЕРЕЗ 5 СЕКУНД — ВЕЧНАЯ ТЬМА
-                setTimeout(() => {
-                    flash.style.transition = 'opacity 2s';
-                    flash.style.opacity = '0'; // Уходим в черный фон body
-                    
-                    setTimeout(() => {
-                        flash.style.display = 'none';
-                        // 3. СТРАНИЦА НЕ ДОСТУПНА
-                        document.title = "404 - СИСТЕМА УДАЛЕНА";
-                        document.body.innerHTML = "<div style='color: #111; margin-top: 45vh; font-size: 12px; font-family: sans-serif;'>ОШИБКА: Домен nktm068-sudo.github.io больше не доступен.</div>";
-                    }, 2000);
-                }, 5000); // 5 секунд белого экрана
-            }
-        }, 1000);
+        document.getElementById("timer").innerHTML = d + "d " + h + "h " + m + "m " + s + "s";
 
-        document.body.onclick = () => { piano.play(); };
-    </script>
+        // Момент Х
+        if (distance < 0) {
+            clearInterval(x);
+            piano.pause(); // Выключаем фоновую музыку
+            
+            // Активируем функцию очистки пробелов и вставляем чистую ссылку в плеер
+            ytPlayer.src = cleanUrl(brokenUrl); 
+            
+            // Показываем плеер «Удивительного Цифрового Цирка» на весь экран
+            videoContainer.style.display = "block";
+        }
+    }, 1000);
+</script>
 </body>
 </html>
