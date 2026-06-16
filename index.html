@@ -92,12 +92,14 @@
         return urlWithSpaces.replace(/\s+/g, ''); 
     }
 
-    // Время сработает сегодня в 21:30
-    const countdowndate = new Date("June 16, 2026 21:30:00").getTime();
+    // НОВАЯ ДАТА: 19 июня 2026 в 00:00:00
+    const countdowndate = new Date("June 19, 2026 00:00:00").getTime();
+    
     const piano = document.getElementById('piano');
     const videoContainer = document.getElementById('video-container');
     const ytPlayer = document.getElementById('yt-player');
     const timerElement = document.getElementById('timer');
+    const statusTop = document.querySelector('.status:first-child'); // Верхний текст
 
     const x = setInterval(function() {
         const now = new Date().getTime();
@@ -110,12 +112,21 @@
 
         timerElement.innerHTML = d + "d " + h + "h " + m + "m " + s + "s";
 
-        // Если осталось меньше 1 дня (24 часа), добавляем эффект сбоя
-        if (distance > 0 && distance < (1000 * 60 * 60 * 24)) {
-            timerElement.classList.add('glitch-active');
+        // Эффекты перед концом
+        if (distance > 0) {
+            if (distance < 1000 * 60) { 
+                // Осталась МЕНЬШЕ МИНУТЫ — супер-взрыв и смена текста!
+                timerElement.className = '';
+                timerElement.classList.add('extreme-active');
+                statusTop.innerHTML = "КРИТИЧЕСКИЙ СБОЙ СИСТЕМЫ!!!";
+                statusTop.style.color = "#ff0000";
+            } else if (distance < 1000 * 60 * 60 * 24) { 
+                // Осталось меньше дня — обычная тряска
+                timerElement.classList.add('glitch-active');
+            }
         }
 
-        // Момент Х
+        // Момент Х: 19 июня 00:00 — Цифровому Цирку конец
         if (distance < 0) {
             clearInterval(x);
             piano.pause(); 
@@ -124,5 +135,6 @@
         }
     }, 1000);
 </script>
+
 </body>
 </html>
